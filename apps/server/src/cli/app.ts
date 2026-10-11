@@ -179,7 +179,8 @@ const appEnvironment = Config.all({
   sshTty: Config.String("SSH_TTY").pipe(Config.option),
 });
 
-const runAppCommand = Effect.fn("cli.app")(function* (flags: {
+/** Asks the running desktop app to open a workspace; returns the resolved root. */
+export const activateDesktopApp = Effect.fn("cli.app.activate")(function* (flags: {
   readonly baseDir: Option.Option<string>;
   readonly workspaceRoot: Option.Option<string>;
 }) {
@@ -244,6 +245,14 @@ const runAppCommand = Effect.fn("cli.app")(function* (flags: {
     });
   }
 
+  return workspaceRoot;
+});
+
+const runAppCommand = Effect.fn("cli.app")(function* (flags: {
+  readonly baseDir: Option.Option<string>;
+  readonly workspaceRoot: Option.Option<string>;
+}) {
+  const workspaceRoot = yield* activateDesktopApp(flags);
   yield* Console.log(`Opened ${workspaceRoot} in T3 Code.`);
 });
 
